@@ -19,7 +19,7 @@ router.route('/login').post(login);
 
 /**Get methods */
 router.route('/user/:username').get(getUser);
-router.route('/generateOTP').get(genOTP);
+// router.route('/generateOTP').get(genOTP);
 router.route('/verifyOTP').get(verifyOTP);
 router.route('/createresetsession').get(createResetSession);
 

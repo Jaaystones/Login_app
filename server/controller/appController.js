@@ -1,5 +1,6 @@
 const User = require('../model/User');
 const bcrypt = require('bcrypt');
+const genToken = require('../controller/genToken');
 
 const register = async(req, res) => {
     try{
@@ -31,7 +32,7 @@ const register = async(req, res) => {
 
         //validation
         if(user){
-            return res.status(201).json({message: `User ${username} created successfully`});
+            return res.status(201).json({message: `User ${username} created successfully`, newUser});
         }else{
             return res.status(400).json({message: `Registration for ${username} failed`});
         }
@@ -40,9 +41,57 @@ const register = async(req, res) => {
     }
 }
 
-const login = async(req, res) => {
-    return res.json('login route');
-}
+const login = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        // Error handling
+        if (!username) {
+            return res.status(401).json({ message: 'Username is required' });
+        }
+        if (!password) {
+            return res.status(401).json({ message: 'Password is required' });
+        }
+
+        // Find user by username
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(400).json({ message: 'User not found. Please sign up!' });
+        }
+
+        // Check password
+        const passwordIsValid = await bcrypt.compare(password, user.password);
+
+        if (!passwordIsValid) {
+            return res.status(401).json({ message: 'Invalid password' });
+        }
+
+        // Generate a token
+        const token = genToken(user._id);
+
+        // Set cookie if password is valid
+        if (passwordIsValid) {
+            res.cookie("token", token, {
+                path: "/",
+                httpOnly: true,
+                expires: new Date(Date.now() + 1000 * 24 * 60 * 60),
+                sameSite: "none",
+                secure: true,
+            });
+        }
+
+        // Return success message
+        if (user && passwordIsValid) {
+            return res.status(200).json({ message: 'Login successful' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
 
 const getUser = async(req, res) => {
     return res.json('user route');
@@ -50,10 +99,6 @@ const getUser = async(req, res) => {
 
 const updateUser = async(req, res) => {
     return res.json('update route');
-}
-
-const genOTP = async(req, res) => {
-    return res.json('gen route');
 }
 
 const verifyOTP = async(req, res) => {
@@ -73,7 +118,6 @@ module.exports = {
     login,
     getUser,
     updateUser,
-    genOTP,
     verifyOTP,
     createResetSession,
     resetPassword }
