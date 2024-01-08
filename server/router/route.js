@@ -1,10 +1,10 @@
 const Router = require('express');
 const router = Router();
+const verifyUser = require('../controller/verifyUser');
 const { register,
         login,
         getUser,
         updateUser,
-        genOTP,
         verifyOTP,
         createResetSession,
         resetPassword } = require('../controller/appController');
@@ -14,7 +14,7 @@ const { register,
 router.route('/register').post(register);
 // router.route('/registermail').post()
 // router.route('/authenticate').post(req, res)
-router.route('/login').post(login);
+router.route('/login').post(verifyUser,login);
 
 
 /**Get methods */
