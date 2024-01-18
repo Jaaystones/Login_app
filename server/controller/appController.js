@@ -32,7 +32,7 @@ const register = async(req, res) => {
 
         //validation
         if(user){
-            return res.status(201).json({message: `User ${username} created successfully`, username, email, firstName, lastName, profile});
+            return res.status(201).json({message: `User ${username} created successfully`, _id, username, email, firstName, lastName, profile});
         }else{
             return res.status(400).json({message: `Registration for ${username} failed`});
         }
